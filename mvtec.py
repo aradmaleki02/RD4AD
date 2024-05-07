@@ -134,7 +134,7 @@ class MVTEC(data.Dataset):
             target = 1
 
         if self.train:
-            return image, target
+            return self.transform_norm(image), target
 
         if self.select_random_image_from_imagenet:
             imagenet30_img = self.imagenet30_testset[int(random.random() * len(self.imagenet30_testset))][0].resize(
