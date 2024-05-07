@@ -142,9 +142,14 @@ def train(_class_):
 if __name__ == '__main__':
 
     setup_seed(111)
-    item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
-                 'transistor', 'metal_nut', 'screw','toothbrush', 'zipper', 'tile', 'wood']
-    for i in item_list:
+    # item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
+    #              'transistor', 'metal_nut', 'screw','toothbrush', 'zipper', 'tile', 'wood']
+    import argparse
+
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--category', type=str, default='carpet')
+    args = parser.parse_args()
+    for i in [args.category]:
         print(f'----------------{i}-------------------')
         train(i)
 
