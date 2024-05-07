@@ -62,12 +62,10 @@ def loss_concat(a, b):
     loss += torch.mean(1-cos_loss(a_map,b_map))
     return loss
 
-def train(_class_):
+def train(_class_, epochs=200, image_size=224):
     print(_class_)
-    epochs = 200
     learning_rate = 0.005
     batch_size = 16
-    image_size = 224
     mean_train = [0.485, 0.456, 0.406]
     std_train = [0.229, 0.224, 0.225]
     trans_norm = transforms.Normalize(mean=mean_train,
@@ -148,8 +146,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--category', type=str, default='carpet')
+    parser.add_argument('--total_iters', type=int, default=200)
+    parser.add_argument('--image_size', type=int, default=224)
     args = parser.parse_args()
     for i in [args.category]:
         print(f'----------------{i}-------------------')
-        train(i)
+        train(i, args.total_iters, args.image_size)
 
