@@ -119,7 +119,6 @@ def train(_class_):
             optimizer.step()
             loss_list.append(loss.item())
         print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, np.mean(loss_list)))
-        print('=' * 30)
 
         if (epoch + 1) % 25 == 0:
             print('Main:')
@@ -127,14 +126,14 @@ def train(_class_):
             print('Pixel Auroc:{:.3f}, Sample Auroc{:.3f}, Pixel Aupro{:.3}'.format(auroc_px, auroc_sp, aupro_px))
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
-        print('=' * 30)
+            print('=' * 30)
         if (epoch + 1) % 25 == 0:
             print('Shifted:')
             auroc_px, auroc_sp, aupro_px = evaluation(encoder, bn, decoder, test_dataloader2, device)
             print('Pixel Auroc:{:.3f}, Sample Auroc{:.3f}, Pixel Aupro{:.3}'.format(auroc_px, auroc_sp, aupro_px))
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
-        print('=' * 30)
+            print('=' * 30)
     return auroc_px, auroc_sp, aupro_px
 
 
