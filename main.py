@@ -124,15 +124,15 @@ def train(_class_):
             print('Main:')
             auroc_sp = evaluation(encoder, bn, decoder, test_dataloader1, device)
             print('Sample Auroc{:.3f}'.format(auroc_sp))
-            torch.save({'bn': bn.state_dict(),
-                        'decoder': decoder.state_dict()}, ckp_path)
+            # torch.save({'bn': bn.state_dict(),
+            #             'decoder': decoder.state_dict()}, ckp_path)
             print('=' * 30)
         if (epoch + 1) % 2 == 0:
             print('Shifted:')
             auroc_sp = evaluation(encoder, bn, decoder, test_dataloader2, device)
             print('Sample Auroc{:.3f}'.format(auroc_sp))
-            torch.save({'bn': bn.state_dict(),
-                        'decoder': decoder.state_dict()}, ckp_path)
+            # torch.save({'bn': bn.state_dict(),
+            #             'decoder': decoder.state_dict()}, ckp_path)
             print('=' * 30)
     return auroc_sp
 
