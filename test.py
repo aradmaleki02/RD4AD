@@ -69,11 +69,11 @@ def evaluation(encoder, bn, decoder, dataloader,device,_class_=None):
     #t_bn.to(device)
     #t_bn.load_state_dict(bn.state_dict())
     decoder.eval()
-    gt_list_px = []
-    pr_list_px = []
+    # gt_list_px = []
+    # pr_list_px = []
     gt_list_sp = []
     pr_list_sp = []
-    aupro_list = []
+    # aupro_list = []
     with torch.no_grad():
         for img, gt, label, _ in dataloader:
 
@@ -82,14 +82,14 @@ def evaluation(encoder, bn, decoder, dataloader,device,_class_=None):
             outputs = decoder(bn(inputs))
             anomaly_map, _ = cal_anomaly_map(inputs, outputs, img.shape[-1], amap_mode='a')
             anomaly_map = gaussian_filter(anomaly_map, sigma=4)
-            gt[gt > 0.5] = 1
-            gt[gt <= 0.5] = 0
-            if label.item()!=0:
-                aupro_list.append(compute_pro(gt.squeeze(0).cpu().numpy().astype(int),
-                                              anomaly_map[np.newaxis,:,:]))
-            gt_list_px.extend(gt.cpu().numpy().astype(int).ravel())
-            pr_list_px.extend(anomaly_map.ravel())
-            gt_list_sp.append(np.max(gt.cpu().numpy().astype(int)))
+            # gt[gt > 0.5] = 1
+            # gt[gt <= 0.5] = 0
+            # if label.item()!=0:
+            #     aupro_list.append(compute_pro(gt.squeeze(0).cpu().numpy().astype(int),
+            #                                   anomaly_map[np.newaxis,:,:]))
+            # gt_list_px.extend(gt.cpu().numpy().astype(int).ravel())
+            # pr_list_px.extend(anomaly_map.ravel())
+            gt_list_sp.extend(label.tolist())
             pr_list_sp.append(np.max(anomaly_map))
 
         #ano_score = (pr_list_sp - np.min(pr_list_sp)) / (np.max(pr_list_sp) - np.min(pr_list_sp))
@@ -102,9 +102,9 @@ def evaluation(encoder, bn, decoder, dataloader,device,_class_=None):
         #    pickle.dump(vis_data, f, pickle.HIGHEST_PROTOCOL)
 
 
-        auroc_px = round(roc_auc_score(gt_list_px, pr_list_px), 3)
+        # auroc_px = round(roc_auc_score(gt_list_px, pr_list_px), 3)
         auroc_sp = round(roc_auc_score(gt_list_sp, pr_list_sp), 3)
-    return auroc_px, auroc_sp, round(np.mean(aupro_list),3)
+    return auroc_sp
 
 def test(_class_):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
