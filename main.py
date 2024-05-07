@@ -122,19 +122,19 @@ def train(_class_):
 
         if (epoch + 1) % 2 == 0:
             print('Main:')
-            auroc_px, auroc_sp, aupro_px = evaluation(encoder, bn, decoder, test_dataloader1, device)
-            print('Pixel Auroc:{:.3f}, Sample Auroc{:.3f}, Pixel Aupro{:.3}'.format(auroc_px, auroc_sp, aupro_px))
+            auroc_sp = evaluation(encoder, bn, decoder, test_dataloader1, device)
+            print('Sample Auroc{:.3f}'.format(auroc_sp))
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
             print('=' * 30)
         if (epoch + 1) % 2 == 0:
             print('Shifted:')
-            auroc_px, auroc_sp, aupro_px = evaluation(encoder, bn, decoder, test_dataloader2, device)
-            print('Pixel Auroc:{:.3f}, Sample Auroc{:.3f}, Pixel Aupro{:.3}'.format(auroc_px, auroc_sp, aupro_px))
+            auroc_sp = evaluation(encoder, bn, decoder, test_dataloader2, device)
+            print('Sample Auroc{:.3f}'.format(auroc_sp))
             torch.save({'bn': bn.state_dict(),
                         'decoder': decoder.state_dict()}, ckp_path)
             print('=' * 30)
-    return auroc_px, auroc_sp, aupro_px
+    return auroc_sp
 
 
 
