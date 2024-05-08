@@ -118,14 +118,14 @@ def train(_class_, epochs=200, image_size=224):
             loss_list.append(loss.item())
         print('epoch [{}/{}], loss:{:.4f}'.format(epoch + 1, epochs, np.mean(loss_list)))
 
-        if (epoch + 1) % 1 == 0:
+        if (epoch + 1) % 25 == 0:
             print('Main:')
             auroc_sp = evaluation(encoder, bn, decoder, test_dataloader1, device)
             print('Sample Auroc{:.3f}'.format(auroc_sp))
             # torch.save({'bn': bn.state_dict(),
             #             'decoder': decoder.state_dict()}, ckp_path)
             print('=' * 30)
-        if (epoch + 1) % 1 == 0:
+        if (epoch + 1) % 25 == 0:
             print('Shifted:')
             auroc_sp = evaluation(encoder, bn, decoder, test_dataloader2, device)
             print('Sample Auroc{:.3f}'.format(auroc_sp))
@@ -140,8 +140,8 @@ def train(_class_, epochs=200, image_size=224):
 if __name__ == '__main__':
 
     setup_seed(111)
-    # item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
-    #              'transistor', 'metal_nut', 'screw','toothbrush', 'zipper', 'tile', 'wood']
+    item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
+                 'transistor', 'metal_nut', 'screw','toothbrush', 'zipper', 'tile', 'wood']
     import argparse
 
     parser = argparse.ArgumentParser(description='')
