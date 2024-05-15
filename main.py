@@ -229,6 +229,8 @@ def train(_class_, epochs=200, image_size=224):
         test_data2 = GTA_Test(image_path=glob_test_id + glob_ood,
                             labels=[0] * len(glob_test_id) + [1] * len(glob_ood),
                             transform=transform)
+    elif _class_ == 'waterbirds':
+
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)

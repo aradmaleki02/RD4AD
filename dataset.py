@@ -105,6 +105,9 @@ class GTA(Dataset):
             image = self.transform(image)
         return image, self.labels[index]
 
+    def __len__(self):
+        return len(self.image_files)
+
 
 class GTA_Test(Dataset):
     def __init__(self, image_path, labels, transform=None, count=-1):
