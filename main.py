@@ -230,6 +230,7 @@ def train(_class_, epochs=200, image_size=224):
                             labels=[0] * len(glob_test_id) + [1] * len(glob_ood),
                             transform=transform)
     elif _class_ == 'waterbirds':
+        pass
 
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
