@@ -8,7 +8,7 @@ from pathlib import Path
 import torch
 from torchvision import transforms
 
-from dataset import get_data_transforms, BrainTrain, BrainTest, GTA, GTA_Test
+from dataset import get_data_transforms, BrainTrain, BrainTest, GTA, GTA_Test, Waterbird
 from torchvision.datasets import ImageFolder
 import numpy as np
 import random
@@ -230,7 +230,17 @@ def train(_class_, epochs=200, image_size=224):
                             labels=[0] * len(glob_test_id) + [1] * len(glob_ood),
                             transform=transform)
     elif _class_ == 'waterbirds':
-        pass
+        import pandas as pd
+        df = pd.read_csv('/kaggle/input/waterbird/waterbird/metadata.csv')
+        train_data = Waterbird(root='/kaggle/input/waterbird/waterbird', df=df,
+                              transform=transform, train=True, count_train_landbg=3500,
+                              count_train_waterbg=100)
+        test_data1 = Waterbird(root='/kaggle/input/waterbird/waterbird', df=df,
+                             transform=transform, train=False, count_train_landbg=3500,
+                             count_train_waterbg=100, mode='bg_land')
+        test_data2 = Waterbird(root='/kaggle/input/waterbird/waterbird', df=df,
+                             transform=transform, train=False, count_train_landbg=3500,
+                             count_train_waterbg=100, mode='bg_water')
 
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
