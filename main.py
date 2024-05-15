@@ -8,7 +8,7 @@ from pathlib import Path
 import torch
 from torchvision import transforms
 
-from dataset import get_data_transforms, BrainTrain, BrainTest
+from dataset import get_data_transforms, BrainTrain, BrainTest, GTA, GTA_Test
 from torchvision.datasets import ImageFolder
 import numpy as np
 import random
@@ -222,11 +222,11 @@ def train(_class_, epochs=200, image_size=224):
         test_label = [0] * len(normal_path_test) + [1] * len(anomaly_path)
         train_label = [0] * len(normal_path_train)
         glob_train_id, glob_test_id, glob_ood = get_gta_globs()
-        train_set = GTA(image_path=normal_path_train, labels=train_label,
+        train_data = GTA(image_path=normal_path_train, labels=train_label,
                         transform=transform)
-        test_set = GTA_Test(image_path=test_path, labels=test_label,
+        test_data1 = GTA_Test(image_path=test_path, labels=test_label,
                             transform=transform)
-        test_set = GTA_Test(image_path=glob_test_id + glob_ood,
+        test_data2 = GTA_Test(image_path=glob_test_id + glob_ood,
                             labels=[0] * len(glob_test_id) + [1] * len(glob_ood),
                             transform=transform)
 
