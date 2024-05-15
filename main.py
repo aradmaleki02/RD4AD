@@ -2,11 +2,13 @@
 
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+import shutil
+from pathlib import Path
 
 import torch
 from torchvision import transforms
 
-from dataset import get_data_transforms
+from dataset import get_data_transforms, BrainTrain, BrainTest
 from torchvision.datasets import ImageFolder
 import numpy as np
 import random
@@ -62,6 +64,95 @@ def loss_concat(a, b):
     loss += torch.mean(1-cos_loss(a_map,b_map))
     return loss
 
+
+def prepare_br35h_dataset_files():
+    normal_path35 = '/kaggle/input/brain-tumor-detection/no'
+    anomaly_path35 = '/kaggle/input/brain-tumor-detection/yes'
+
+    print(f"len(os.listdir(normal_path35)): {len(os.listdir(normal_path35))}")
+    print(f"len(os.listdir(anomaly_path35)): {len(os.listdir(anomaly_path35))}")
+
+    print('cnt')
+
+    Path('./Br35H/dataset/test/anomaly').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./Br35H/dataset/test/anomaly')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/test/anomaly', f))
+
+    anom35 = os.listdir(anomaly_path35)
+    for f in anom35:
+        shutil.copy2(os.path.join(anomaly_path35, f), './Br35H/dataset/test/anomaly')
+
+
+    normal35 = os.listdir(normal_path35)
+    random.shuffle(normal35)
+    ratio = 0.7
+    sep = round(len(normal35) * ratio)
+
+    Path('./Br35H/dataset/test/normal').mkdir(parents=True, exist_ok=True)
+    Path('./Br35H/dataset/train/normal').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./Br35H/dataset/test/normal')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/test/normal', f))
+
+    flist = [f for f in os.listdir('./Br35H/dataset/train/normal')]
+    for f in flist:
+        os.remove(os.path.join('./Br35H/dataset/train/normal', f))
+
+    for f in normal35[:sep]:
+        shutil.copy2(os.path.join(normal_path35, f), './Br35H/dataset/train/normal')
+    for f in normal35[sep:]:
+        shutil.copy2(os.path.join(normal_path35, f), './Br35H/dataset/test/normal')
+
+
+def prepare_brats2015_dataset_files():
+    import pandas as pd
+    labels = pd.read_csv('/kaggle/input/brain-tumor/Brain Tumor.csv')
+    labels = labels[['Image', 'Class']]
+    labels.tail() # 0: no tumor, 1: tumor
+
+    labels.head()
+
+    brats_path = '/kaggle/input/brain-tumor/Brain Tumor/Brain Tumor'
+    lbl = dict(zip(labels.Image, labels.Class))
+
+    keys = lbl.keys()
+    normalbrats = [x for x in keys if lbl[x] == 0]
+    anomalybrats = [x for x in keys if lbl[x] == 1]
+
+    Path('./brats/dataset/test/anomaly').mkdir(parents=True, exist_ok=True)
+    Path('./brats/dataset/test/normal').mkdir(parents=True, exist_ok=True)
+    Path('./brats/dataset/train/normal').mkdir(parents=True, exist_ok=True)
+
+    flist = [f for f in os.listdir('./brats/dataset/test/anomaly')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/test/anomaly', f))
+
+    flist = [f for f in os.listdir('./brats/dataset/test/normal')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/test/normal', f))
+
+    flist = [f for f in os.listdir('./brats/dataset/train/normal')]
+    for f in flist:
+        os.remove(os.path.join('./brats/dataset/train/normal', f))
+
+    ratio = 0.7
+    random.shuffle(normalbrats)
+    bratsep = round(len(normalbrats) * ratio)
+
+    for f in anomalybrats:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/anomaly')
+    for f in normalbrats[:bratsep]:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/train/normal')
+    for f in normalbrats[bratsep:]:
+        ext = f'{f}.jpg'
+        shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/normal')
+
+
 def train(_class_, epochs=200, image_size=224):
     print(_class_)
     learning_rate = 0.005
@@ -76,18 +167,12 @@ def train(_class_, epochs=200, image_size=224):
     print(device)
 
     # data_transform, gt_transform = get_data_transforms(image_size, image_size)
-    train_path = './mvtec/' + _class_ + '/train'
-    test_path = './mvtec/' + _class_
-    ckp_path = './checkpoints/' + 'wres50_'+_class_+'.pth'
-    train_data = MVTEC(root='/kaggle/input/mvtec-ad', train=True, transform=transform, category=_class_,
-                       resize=224, use_imagenet=True, select_random_image_from_imagenet=True,
-                       shrink_factor=1, transform_norm=trans_norm)
-    test_data1 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=transform, category=_class_,
-                       resize=224, use_imagenet=True, select_random_image_from_imagenet=True,
-                       shrink_factor=1, transform_norm=trans_norm)
-    test_data2 = MVTEC(root='/kaggle/input/mvtec-ad', train=False, transform=transform, category=_class_,
-                       resize=224, use_imagenet=True, select_random_image_from_imagenet=True,
-                       shrink_factor=0.9, transform_norm=trans_norm)
+    if _class_ == 'brain':
+        prepare_br35h_dataset_files()
+        prepare_brats2015_dataset_files()
+        train_data = BrainTrain(transform=transform)
+        test_data1 = BrainTest(transform=transform, test_id=1)
+        test_data2 = BrainTest(transform=transform, test_id=2)
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)
@@ -140,12 +225,11 @@ def train(_class_, epochs=200, image_size=224):
 if __name__ == '__main__':
 
     setup_seed(111)
-    item_list = ['carpet', 'bottle', 'hazelnut', 'leather', 'cable', 'capsule', 'grid', 'pill',
-                 'transistor', 'metal_nut', 'screw','toothbrush', 'zipper', 'tile', 'wood']
+
     import argparse
 
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--category', type=str, default='carpet')
+    parser.add_argument('--dataset', type=str, default='brain')
     parser.add_argument('--total_iters', type=int, default=200)
     parser.add_argument('--image_size', type=int, default=224)
     args = parser.parse_args()
