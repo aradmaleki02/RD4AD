@@ -233,7 +233,5 @@ if __name__ == '__main__':
     parser.add_argument('--total_iters', type=int, default=200)
     parser.add_argument('--image_size', type=int, default=224)
     args = parser.parse_args()
-    for i in [args.category]:
-        print(f'----------------{i}-------------------')
-        train(i, args.total_iters, args.image_size)
+    train(args.dataset, args.total_iters, args.image_size)
 
