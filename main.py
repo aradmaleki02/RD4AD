@@ -152,6 +152,49 @@ def prepare_brats2015_dataset_files():
         ext = f'{f}.jpg'
         shutil.copy2(os.path.join(brats_path, ext), './brats/dataset/test/normal')
 
+def get_cityscape_globs():
+    from glob import glob
+    import random
+    normal_path = glob('/kaggle/input/cityscapes-5-10-threshold/cityscapes/ID/*')
+    anomaly_path = glob('/kaggle/input/cityscapes-5-10-threshold/cityscapes/OOD/*')
+
+    random.seed(42)
+    random.shuffle(normal_path)
+    train_ratio = 0.7
+    separator = int(train_ratio * len(normal_path))
+    normal_path_train = normal_path[:separator]
+    normal_path_test = normal_path[separator:]
+
+    return normal_path_train, normal_path_test, anomaly_path
+
+
+def get_gta_globs():
+    from glob import glob
+    nums = [f'0{i}' for i in range(1, 10)] + ['10']
+    globs_id = []
+    globs_ood = []
+    for i in range(10):
+        id_path = f'/kaggle/input/gta5-15-5-{nums[i]}/gta5_{i}/gta5_{i}/ID/*'
+        ood_path = f'/kaggle/input/gta5-15-5-{nums[i]}/gta5_{i}/gta5_{i}/OOD/*'
+        globs_id.append(glob(id_path))
+        globs_ood.append(glob(ood_path))
+        print(i, len(globs_id[-1]), len(globs_ood[-1]))
+
+    glob_id = []
+    glob_ood = []
+    for i in range(len(globs_id)):
+        glob_id += globs_id[i]
+        glob_ood += globs_ood[i]
+
+    random.seed(42)
+    random.shuffle(glob_id)
+    train_ratio = 0.7
+    separator = int(train_ratio * len(glob_id))
+    glob_train_id = glob_id[:separator]
+    glob_test_id = glob_id[separator:]
+
+    return glob_train_id, glob_test_id, glob_ood
+
 
 def train(_class_, epochs=200, image_size=224):
     print(_class_)
@@ -173,6 +216,19 @@ def train(_class_, epochs=200, image_size=224):
         train_data = BrainTrain(transform=transform)
         test_data1 = BrainTest(transform=transform, test_id=1)
         test_data2 = BrainTest(transform=transform, test_id=2)
+    elif _class_ == 'gta':
+        normal_path_train, normal_path_test, anomaly_path = get_cityscape_globs()
+        test_path = normal_path_test + anomaly_path
+        test_label = [0] * len(normal_path_test) + [1] * len(anomaly_path)
+        train_label = [0] * len(normal_path_train)
+        glob_train_id, glob_test_id, glob_ood = get_gta_globs()
+        train_set = GTA(image_path=normal_path_train, labels=train_label,
+                        transform=transform)
+        test_set = GTA_Test(image_path=test_path, labels=test_label,
+                            transform=transform)
+        test_set = GTA_Test(image_path=glob_test_id + glob_ood,
+                            labels=[0] * len(glob_test_id) + [1] * len(glob_ood),
+                            transform=transform)
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader1 = torch.utils.data.DataLoader(test_data1, batch_size=1, shuffle=False)
