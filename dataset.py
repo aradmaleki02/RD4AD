@@ -31,15 +31,15 @@ class BrainTest(torch.utils.data.Dataset):
         self.transform = transform
         self.test_id = test_id
 
-        test_normal_path = glob('./Br35H/dataset/test/normal/*')
-        test_anomaly_path = glob('./Br35H/dataset/test/anomaly/*')
+        test_normal_path = glob.glob('./Br35H/dataset/test/normal/*')
+        test_anomaly_path = glob.glob('./Br35H/dataset/test/anomaly/*')
 
         self.test_path = test_normal_path + test_anomaly_path
         self.test_label = [0] * len(test_normal_path) + [1] * len(test_anomaly_path)
 
         if self.test_id == 2:
-            test_normal_path = glob('./brats/dataset/test/normal/*')
-            test_anomaly_path = glob('./brats/dataset/test/anomaly/*')
+            test_normal_path = glob.glob('./brats/dataset/test/normal/*')
+            test_anomaly_path = glob.glob('./brats/dataset/test/anomaly/*')
 
             self.test_path = test_normal_path + test_anomaly_path
             self.test_label = [0] * len(test_normal_path) + [1] * len(test_anomaly_path)
@@ -56,15 +56,17 @@ class BrainTest(torch.utils.data.Dataset):
         image = self.transform(img)
 
         has_anomaly = 0 if self.test_label[idx] == 0 else 1
+        gt = torch.zeros([1, image.size()[-2], image.size()[-2]])
+        gt[:, :, 1:3] = 1
 
-        return image, has_anomaly
+        return image, gt, has_anomaly, img_path
 
 
 class BrainTrain(torch.utils.data.Dataset):
     def __init__(self, transform):
         self.transform = transform
-        self.image_paths = glob('./Br35H/dataset/train/normal/*')
-        brats_mod = glob('./brats/dataset/train/normal/*')
+        self.image_paths = glob.glob('./Br35H/dataset/train/normal/*')
+        brats_mod = glob.glob('./brats/dataset/train/normal/*')
         random.seed(1)
         random_brats_images = random.sample(brats_mod, 50)
         self.image_paths.extend(random_brats_images)
